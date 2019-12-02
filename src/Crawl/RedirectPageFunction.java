@@ -1,6 +1,7 @@
 package Crawl;
 
 public interface RedirectPageFunction {
+    
     /**
      * 
      * @param url

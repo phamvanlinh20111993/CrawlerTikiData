@@ -21,14 +21,30 @@ public class RedirectPageJsFunctionImpl implements RedirectPageFunction {
         // convert to string
         String domStr = dom.toString();
         domStr = ignoreCommentAdvance(domStr, "//", "/*||*/");
-        String PATTERN = "\\s*(?:const|var|let|\\s*)?\\s*" + name + "\\s*=('|\")?(.*)\\1?(?:\\s*(,|;|[^,;]))?";
+        String PATTERN = "\\s*(?:const|var|let|\\s*)?\\s*" + name + "\\s*=\\s*";
         Pattern p = Pattern.compile(PATTERN, Pattern.MULTILINE);
         Matcher m = p.matcher(domStr);
-        
         List<String> res = new ArrayList<>();
-        while(m.find()) {
-            res.add(m.group(2).toString());
+
+        while (m.find()) {
+            int end = m.end();
+            String value = "";
+            boolean isInString = false;
+            while (end < domStr.length()) {
+                if (domStr.charAt(end - 1) != '\\'
+                     && (domStr.charAt(end) == '"' || domStr.charAt(end) == '\''))
+                    isInString = !isInString;
+                if (!isInString) {
+                    if (domStr.charAt(end) == ';' || domStr.charAt(end) == ',' || domStr.charAt(end) == '\n')
+                        break;
+                    value += domStr.charAt(end);
+                } else
+                    value += domStr.charAt(end);
+                end++;
+            }
+            res.add(value);
         }
+
         return res.toArray(new String[res.size()]);
     }
 
@@ -37,7 +53,7 @@ public class RedirectPageJsFunctionImpl implements RedirectPageFunction {
         String DomStr = dom.toString();
         return DomStr.matches("window.location.href|window.location.replace");
     }
-    
+
     @Override
     public String ignoreComment(Object dom) {
         String domStr = dom.toString();
@@ -111,7 +127,7 @@ public class RedirectPageJsFunctionImpl implements RedirectPageFunction {
         boolean isMultiLine = false;
         String[] getSignOpenAndClose = mutilLineCmtSignal.split("\\|\\|");
         String openSignMutiLine = getSignOpenAndClose[0], closeSignMutiLine = getSignOpenAndClose[1];
-       
+
         for (int i = 0; i < breakLines.length; i++) {
             boolean isInString = false;
             Integer startCut = 0;
@@ -139,7 +155,7 @@ public class RedirectPageJsFunctionImpl implements RedirectPageFunction {
                     j = startCut - 1;
                 }
             }
-            //add to list
+            // add to list
             tmp = tmp.trim();
             if (!isMultiLine && !UtilsFunc.isEmpty(tmp)) {
                 newStringList.add(tmp);

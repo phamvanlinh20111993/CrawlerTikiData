@@ -138,10 +138,7 @@ public class Spider {
             HTMLDOM = Spider.connect(Constant.BASEURL);
             List<ObjectData> getListType = catalogAndProductType.getTikiData(HTMLDOM);
 
-            int count = 0;
             for (ObjectData objectData : getListType) {
-                // if (count == 1)
-                // break;
                 TikiData tikiData = (TikiData) objectData.getValue();
                 HTMLDOM1 = Spider.connect(objectData.getKey().toString());
                 logFile.writeInListUrlCrawlFile(
@@ -149,11 +146,9 @@ public class Spider {
                 CategoryProduct categoryProduct = catalogAndProductType.getCategoryProduct(HTMLDOM1);
                 List<ObjectData> listUrlProductType = catalogAndProductType.getProductType(HTMLDOM1);
 
-                int count1 = 0;
+               
                 List<ProductType> productTypeList = new ArrayList<>();
                 for (ObjectData objectDataChild : listUrlProductType) {
-                    // if (count1 == 2)
-                    // break;
                     ProductType productType = (ProductType) objectDataChild.getValue();
                     ArrayList<ProductDetail> productList = new ArrayList<>();
                     Integer totalPage = (int) Math.ceil((float) productType.getTotal() / totalUrlOnApage);

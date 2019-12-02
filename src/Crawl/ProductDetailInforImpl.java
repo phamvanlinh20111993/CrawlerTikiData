@@ -55,7 +55,9 @@ public class ProductDetailInforImpl implements ProductDetailInforPage {
 
 	@Override
 	public String getProductName(Element element){
-		Element divContainProductName = element.selectFirst("div.product-detail");
+	    Element divContain = element.selectFirst("div.product-customer-col-5.js-customer-col-5");
+	    divContain = divContain == null ? element : divContain;
+		Element divContainProductName = divContain.selectFirst("div.product-detail");
 		Element divContainProductNameNext = divContainProductName.selectFirst("div.info");
 		Element productNameElement = divContainProductNameNext.selectFirst("div.title");
 		return productNameElement != null ? UtilsFunc.getValueInTagHtml(productNameElement.toString()) : "";
@@ -65,8 +67,14 @@ public class ProductDetailInforImpl implements ProductDetailInforPage {
 	public String getBrand(Element element){
 		element = element.selectFirst("div.product-brand-block");
 		Element getDivContainerBrand = element.selectFirst("div.item-brand");
-		Element getPTagBrand = getDivContainerBrand.selectFirst("p").selectFirst("a");
-		return UtilsFunc.getValueInTagHtml(getPTagBrand != null ? getPTagBrand.toString() : "");
+		Element brandTag = null;
+		if(getDivContainerBrand != null) {
+    		Element getPTagBrand = getDivContainerBrand.selectFirst("p");
+    		if(getPTagBrand != null) {
+    		    brandTag = getPTagBrand.selectFirst("a");
+    		}
+		}
+		return UtilsFunc.getValueInTagHtml(brandTag != null ? brandTag.toString() : "");
 	}
 
 	@Override
@@ -104,8 +112,13 @@ public class ProductDetailInforImpl implements ProductDetailInforPage {
 	@Override
 	public Integer getStar(Element element){
 		element = element.selectFirst("div.product-brand-block");
-		Element getDivContainerStar = element.selectFirst("div.item-other");
-		Element getDivContainerStarNext = getDivContainerStar.selectFirst("div");
+		Element getDivContainerStarNext = null;
+		if(element != null) {
+		    Element getDivContainerStar = element.selectFirst("div.item-other");
+            getDivContainerStarNext = getDivContainerStar == null ? new Element("p")
+                    : getDivContainerStar.selectFirst("div");
+		}
+		
 		String star = UtilsFunc.getValueAttrTagHtml(getDivContainerStarNext.select("meta").first().toString(),
 				"content");
 		;
@@ -116,9 +129,14 @@ public class ProductDetailInforImpl implements ProductDetailInforPage {
 	@Override
 	public Integer getVotes(Element element){
 		element = element.selectFirst("div.product-brand-block");
-		Element getDivContainerVote = element.selectFirst("div.item-other");
-		Element getDivContainerVoteNext = getDivContainerVote.selectFirst("div");
-		Elements metaTag = getDivContainerVoteNext.select("meta");
+		Elements metaTag = null;
+        Element getDivContainerVote = element.selectFirst("div.item-other") == null ? new Element("p")
+                : element.selectFirst("div.item-other");
+		if(getDivContainerVote != null) {
+		    Element getDivContainerVoteNext = getDivContainerVote.selectFirst("div");
+	        metaTag = getDivContainerVoteNext.select("meta");
+		}
+		
 		String vote = UtilsFunc.getValueAttrTagHtml(metaTag.size() > 0 ? metaTag.get(1).toString() : null, "content");
 
 		Integer starNum = UtilsFunc.isNumeric(vote) ? Integer.parseInt(vote) : 0;

@@ -6,6 +6,8 @@ import java.util.List;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
+import com.sun.org.apache.xalan.internal.xsltc.DOM;
+
 import Crawl.CatalogAndProductType;
 import Crawl.CatalogAndProductTypeImpl;
 import Crawl.ProductDetailInforImpl;
@@ -88,22 +90,20 @@ public class MainTest {
 		} 
 		*/
 
-	/*	try {
+		try {
 			// check ProductDetailInfor class
 			ProductDetailInforPage testProductDetailInfor = new ProductDetailInforImpl();
-			//url: https://tiki.vn/mu-bao-hiem-royal-m139-kinh-am-p5757605.html?src=category-page-8594&2hi=0
-			//url: https://tiki.vn/may-loc-khong-khi-cho-xe-hoi-sharp-ig-gc2e-b-den-hang-chinh-hang-p801326.html?src=category-page-8594&2hi=1
-			//url: https://tiki.vn/ta-quan-huggies-dry-goi-cuc-dai-l68-68-mieng-bao-bi-moi-p849022.html?src=category-page-2549&2hi=0
-			//url: https://tiki.vn/ngu-coc-hoa-qua-calbee-furugura-nhat-ban-goi-800g-p6956581.html?src=category-page-4384&2hi=1
-			//url: https://tiki.vn/bo-5-day-dan-hoi-tap-gym-day-dan-hoi-khang-luc-cao-cap-day-dan-hoi-tap-the-duc-tai-nha-cho-nam-va-nu-p14380357.html?src=category-page-1975&2hi=1
-			//url: https://tiki.vn/chuot-khong-day-logitech-m331-silent-plus-hang-chinh-hang-p299461.html?src=category-page-1815&2hi=1
-			// https://tiki.vn/may-doc-sach-kindle-paperwhite-2018-7th-hang-chinh-hang-p2686969.html?jsredirect=oke&src=category-page-1789.1794&amp;2hi=1
-			//https://tiki.vn/dien-thoai-nokia-105-single-sim-2017-hang-chinh-hang-p809652.html?src=category-page-1789.1796&amp;2hi=1
 			doc = Jsoup.connect(
-					"https://tiki.vn/ipad-mini-4-128gb-wifi-3g-4g-nhap-khau-chinh-hang-vang-p1587275.html?src=category-page-1789.1794&amp;2hi=1")
+					"https://tiki.vn/dien-thoai-philips-e316-hang-chinh-hang-xanh-p738611.html?src=category-page-1789.1796&amp;2hi=0")
 					.timeout(Constant.MAX_TIME_CONNECTION)
 					.get();
-			System.out.println(doc);
+			
+			RedirectPageJsFunctionImpl redirectPageJsFunctionImpl = new RedirectPageJsFunctionImpl();
+			System.out.println(doc.selectFirst("script"));
+			String [] value = redirectPageJsFunctionImpl.getValueOfVariable(doc.selectFirst("script"), "urlTarget");
+			for(String v : value)
+			    System.out.println(v);
+			
 			System.out.println("brand: " + testProductDetailInfor.getBrand(doc));
 			System.out.println("name: " + testProductDetailInfor.getProductName(doc));
 			System.out.println("save: " + testProductDetailInfor.getSave(doc));
@@ -149,7 +149,7 @@ public class MainTest {
 			e.printStackTrace();
 		} catch (Exception e) {
 			e.printStackTrace();
-		}  */
+		}
 	
 		
 /*	String str = "<div id=\"gioi-thieu\" class=\"content js-content\" itemprop=\"description\"> \r\n" + 
@@ -349,7 +349,7 @@ public class MainTest {
 		*/
 		
 		//String test = "int a = 2;\n\r int b = 47;/*37;*///41;\n\r int c = 3/*4//5*/;\n\r return a / b * c/*a /* b / c*/;";
-        String test = "#var a = 2;\n\r"
+   /*     String test = "#var a = 2;\n\r"
                 + "// hello world pham val // /// //////\n\r"
                 + "let m = 5000000;<!--\n\r"
                 + "var b = 2;\n\r"
@@ -359,11 +359,11 @@ public class MainTest {
                 + "-->\n\r"
                 + "var b = 3;\n\r"
                 + "return a * b;return a / b * c<!--a <!-- b / c-->;\n\r"
-                + "const counter = 234; /* example for this /* not for you, let bn = \\\"jajaja\\\" **/";
+                + "const counter = 234; /* example for this /* not for you, let bn = \\\"jajaja\\\" **///"; */
 		
-		RedirectPageJsFunctionImpl testRedirectPageJsFunctionImpl = new RedirectPageJsFunctionImpl();
-		String tmp = testRedirectPageJsFunctionImpl.ignoreCommentAdvance(test, "//||#||--", "(<!--||-->)##(/*||*/)");
-		System.out.println(tmp);
+	//	RedirectPageJsFunctionImpl testRedirectPageJsFunctionImpl = new RedirectPageJsFunctionImpl();
+	//	String tmp = testRedirectPageJsFunctionImpl.ignoreCommentAdvance(test, "//||#||--", "(<!--||-->)##(/*||*/)");
+	//	System.out.println(tmp);
 	//	System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
 	//	System.out.println(testRedirectPageJsFunctionImpl.ignoreComment(test));
 	}
