@@ -16,6 +16,21 @@ import Utils.UtilsFunc;
 
 public class CatalogAndProductTypeImpl implements CatalogAndProductType {
 
+    private volatile static CatalogAndProductTypeImpl catalogAndProductTypeImpl;
+    
+    private CatalogAndProductTypeImpl() {}
+    
+    public static CatalogAndProductTypeImpl getInstanceObject() {
+        if(catalogAndProductTypeImpl == null) {
+            synchronized (CatalogAndProductTypeImpl.class) {
+                if(catalogAndProductTypeImpl == null)
+                    return new CatalogAndProductTypeImpl();
+            }
+        }
+        
+        return catalogAndProductTypeImpl;
+    }
+    
 	@Override
 	public List<ObjectData> getTikiData(Element element){
 		List<ObjectData> data = new ArrayList<>();

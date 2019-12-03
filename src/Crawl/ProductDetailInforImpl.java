@@ -11,6 +11,21 @@ import Model.ObjectData;
 import Utils.UtilsFunc;
 
 public class ProductDetailInforImpl implements ProductDetailInforPage {
+    
+    private volatile static ProductDetailInforImpl productDetailInforImpl;
+    
+    private ProductDetailInforImpl() {}
+    
+    public static ProductDetailInforImpl getInstanceObject() {
+        if(productDetailInforImpl == null) {
+            synchronized (ProductDetailInforImpl.class) {
+                if(productDetailInforImpl == null)
+                    return new ProductDetailInforImpl();
+            }
+        }
+        
+        return productDetailInforImpl;
+    }
 	
 	@Override
 	public DetailDescriptionProduct getProductDetail(Element element) {
@@ -176,5 +191,11 @@ public class ProductDetailInforImpl implements ProductDetailInforPage {
 		}
 		return anotherDataList;
 	}
+
+    @Override
+    public boolean checkIsRedirectPage(Element dom) {
+        Elements divContainer = dom.select("div");
+        return divContainer.size() > 0 ? false : true;
+    }
 	
 }

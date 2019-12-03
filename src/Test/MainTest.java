@@ -19,6 +19,8 @@ import Model.DetailDescriptionProduct;
 import Model.ObjectData;
 import Model.ProductType;
 import Model.TikiData;
+import Spider.LogFile;
+import Spider.Spider;
 import Utils.Constant;
 import Utils.UtilsFunc;
 
@@ -90,19 +92,36 @@ public class MainTest {
 		} 
 		*/
 
-		try {
+	/*	try {
 			// check ProductDetailInfor class
-			ProductDetailInforPage testProductDetailInfor = new ProductDetailInforImpl();
-			doc = Jsoup.connect(
-					"https://tiki.vn/dien-thoai-philips-e316-hang-chinh-hang-xanh-p738611.html?src=category-page-1789.1796&amp;2hi=0")
+			ProductDetailInforPage testProductDetailInfor = ProductDetailInforImpl.getInstanceObject();
+			String url = "https://tiki.vn/dien-thoai-philips-e316-hang-chinh-hang-xanh-p738611.html?src=category-page-1789.1796&amp;2hi=0";
+			doc = Jsoup.connect(url)
 					.timeout(Constant.MAX_TIME_CONNECTION)
 					.get();
 			
-			RedirectPageJsFunctionImpl redirectPageJsFunctionImpl = new RedirectPageJsFunctionImpl();
+			RedirectPageJsFunctionImpl redirectPageJsFunctionImpl = RedirectPageJsFunctionImpl.getInstanceObject();
+			Spider spider = new Spider();
 			System.out.println(doc.selectFirst("script"));
 			String [] value = redirectPageJsFunctionImpl.getValueOfVariable(doc.selectFirst("script"), "urlTarget");
 			for(String v : value)
 			    System.out.println(v);
+			
+			String [] value1 = redirectPageJsFunctionImpl.getValueOfVariable(doc.selectFirst("script"), "hashQuery");
+            for(String v : value1)
+                System.out.println(v);
+			
+			String query = redirectPageJsFunctionImpl.locationSearch(url);
+			System.out.println("query str: " + query);
+			
+			//test after change url every thing is ok
+			url = "https://tiki.vn/dien-thoai-philips-e316-hang-chinh-hang-p20420956.html&jsredirect=oke&src=category-page-1789.1796&amp;2hi=0";
+            doc = Jsoup.connect(url)
+                    .timeout(Constant.MAX_TIME_CONNECTION)
+                    .get();
+			
+			String newUrl = spider.changeUrl(doc.selectFirst("script"), url);
+			System.out.println("new url " + newUrl);
 			
 			System.out.println("brand: " + testProductDetailInfor.getBrand(doc));
 			System.out.println("name: " + testProductDetailInfor.getProductName(doc));
@@ -149,7 +168,7 @@ public class MainTest {
 			e.printStackTrace();
 		} catch (Exception e) {
 			e.printStackTrace();
-		}
+		} */
 	
 		
 /*	String str = "<div id=\"gioi-thieu\" class=\"content js-content\" itemprop=\"description\"> \r\n" + 
@@ -366,5 +385,8 @@ public class MainTest {
 	//	System.out.println(tmp);
 	//	System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
 	//	System.out.println(testRedirectPageJsFunctionImpl.ignoreComment(test));
+		
+		// test log file
+		LogFile logFile = LogFile.getInstance();
 	}
 }

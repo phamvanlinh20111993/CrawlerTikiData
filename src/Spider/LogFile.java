@@ -69,7 +69,7 @@ public class LogFile extends IOFileImpl {
     
     @Override
     public String getPathFile() {
-        return  super.getPathFile() + "/Data";
+        return super.getPathFile() + "\\Data\\Day-" + this.getCurrentDateDDMMYYYY()+"\\";
     }
 
     /**
@@ -98,6 +98,6 @@ public class LogFile extends IOFileImpl {
     }
 
     private String getProductAndCategoryFile() {
-        return "TikiData_" + this.getCurrentDateDDMMYYYY();
+        return "TikiDataJson_" + this.getCurrentDateDDMMYYYY();
     }
 }

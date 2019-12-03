@@ -41,7 +41,7 @@ public class IOFileImpl implements IOFile{
 	 */
 	public void writeToFile(String path, String name, String data) {
 
-		String pathName = this.getPathFile() + "\\" + path + name;
+		String pathName = path + name;
 		this.file = new File(pathName);
 
 		if (file.exists() && !file.isDirectory()) {
@@ -63,7 +63,7 @@ public class IOFileImpl implements IOFile{
 	
 	public void clearDataInFile(String path, String name) {
 
-		String pathName = this.getPathFile() + "\\" + path + name;
+		String pathName = path + name;
 		this.file = new File(pathName);
 
 		if (file.exists() && !file.isDirectory()) {
@@ -86,7 +86,7 @@ public class IOFileImpl implements IOFile{
 	 */
 	public String[] readDataFile(String name, String path) {
 
-		String pathName = this.getPathFile() + "\\" + path + name;
+		String pathName = path + name;
 		this.file = new File(pathName);
 
 		ArrayList<String> outP = new ArrayList<>();
@@ -113,18 +113,28 @@ public class IOFileImpl implements IOFile{
 	 * 
 	 * @param name
 	 */
-	public void createFile(String path, String name) {
-		String pathName = this.getPathFile() + "\\";
-		this.file = new File(pathName);
-		// Create the file
-		try {
-			if (file.createNewFile()) {
-				System.out.println("File is created!");
-			}
-		} catch (IOException e) {
-			System.out.println(e.getMessage());
-		}
-	}
+    public void createFile(String path, String name) {
+        String pathName = path;
+        this.file = new File(pathName);
+
+        boolean bool = file.mkdir();
+        if (bool) {
+            System.out.println("Directory created successfully");
+        } else {
+            System.out.println("Sorry couldn’t create specified directory");
+        }
+
+        pathName += name;
+        this.file = new File(pathName);
+        // Create the file
+        try {
+            if (file.createNewFile()) {
+                System.out.println("File is created!");
+            }
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+        }
+    }
 
 	/**
 	 * 

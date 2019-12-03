@@ -100,4 +100,11 @@ public interface ProductDetailInforPage {
 	 * @return
 	 */
 	List<ObjectData> getAnotherData(Element element) throws Exception;
+	
+	/**
+	 * 
+	 * @param dom
+	 * @return
+	 */
+	boolean checkIsRedirectPage(Element dom);
 }

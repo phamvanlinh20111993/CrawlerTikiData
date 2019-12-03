@@ -8,9 +8,10 @@ public class Main {
 	public static void main(String[] args) {
 		// using proxy to connect web:
 		// https://stackoverflow.com/questions/13288471/jsoup-over-vpn-proxy
-		Spider spiderCrawl = new Spider();
-	//	spiderCrawl.getData();
-		System.out.println("Total product " + spiderCrawl.countTotalProduct());
+		SpiderCrawl spiderCrawl = new SpiderCrawl();
+		spiderCrawl.getData();
+	// 	Spider spiderCrawl = new Spider();
+	//	System.out.println("Total product " + spiderCrawl.countTotalProduct());
 		return ;
 	}
 }

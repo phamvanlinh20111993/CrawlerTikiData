@@ -9,10 +9,25 @@ import java.util.regex.Pattern;
 import Utils.UtilsFunc;
 
 public class RedirectPageJsFunctionImpl implements RedirectPageFunction {
-
+    
+    private volatile static RedirectPageJsFunctionImpl redirectPageJsFunctionImpl;
+    
+    public static RedirectPageJsFunctionImpl getInstanceObject() {
+        if(redirectPageJsFunctionImpl == null) {
+            synchronized (RedirectPageJsFunctionImpl.class) {
+                if(redirectPageJsFunctionImpl == null)
+                    return new RedirectPageJsFunctionImpl();
+            }
+        }
+        
+        return redirectPageJsFunctionImpl;
+    }
+    
+    private RedirectPageJsFunctionImpl() {}
+    
     @Override
     public String locationSearch(String url) {
-        String[] list = url.split("?");
+        String[] list = url.split("\\?");
         return list[list.length - 1];
     }
 

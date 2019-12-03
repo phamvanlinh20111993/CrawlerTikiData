@@ -1,6 +1,8 @@
 package Spider;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -17,6 +19,7 @@ import Crawl.CatalogAndProductType;
 import Crawl.CatalogAndProductTypeImpl;
 import Crawl.ProductDetailInforImpl;
 import Crawl.ProductDetailInforPage;
+import Crawl.RedirectPageJsFunctionImpl;
 import Model.CategoryProduct;
 import Model.DetailDescriptionProduct;
 import Model.ObjectData;
@@ -29,13 +32,15 @@ public class Spider {
     private ProductDetailInforPage productDetailOnPage;
     private CatalogAndProductType catalogAndProductType;
     protected LogFile logFile;
+    protected RedirectPageJsFunctionImpl redirectPageJsFunctionImpl;
 
     private static Integer countProduct = 0;
 
     public Spider() {
-        this.productDetailOnPage = new ProductDetailInforImpl();
-        this.catalogAndProductType = new CatalogAndProductTypeImpl();
-        logFile = LogFile.getInstance();
+        this.productDetailOnPage = ProductDetailInforImpl.getInstanceObject();
+        this.catalogAndProductType = CatalogAndProductTypeImpl.getInstanceObject();
+        this.redirectPageJsFunctionImpl = RedirectPageJsFunctionImpl.getInstanceObject();
+        this.logFile = LogFile.getInstance();
     }
 
     /**
@@ -145,7 +150,6 @@ public class Spider {
                         "----" + Spider.getCountProduct() + ", Url: " + objectData.getKey());
                 CategoryProduct categoryProduct = catalogAndProductType.getCategoryProduct(HTMLDOM1);
                 List<ObjectData> listUrlProductType = catalogAndProductType.getProductType(HTMLDOM1);
-
                
                 List<ProductType> productTypeList = new ArrayList<>();
                 for (ObjectData objectDataChild : listUrlProductType) {
@@ -167,7 +171,14 @@ public class Spider {
                                         ArrayList<ProductDetail> productList = new ArrayList<>();
                                         for (String urlDetail : listUrlEachPage) {
                                             Document HTMLDOM3 = Spider.connect(urlDetail);
+                                            // check if is redirect page we will rec connect new url
                                             Spider spider = new Spider();
+                                            if(productDetailOnPage.checkIsRedirectPage(HTMLDOM3)) {
+                                                String newUrlRedirect = spider.changeUrl(HTMLDOM3, urlDetail);
+                                                HTMLDOM3 = Spider.connect(newUrlRedirect);
+                                            }
+                                            
+                                            
                                             Spider.setCountProduct(Spider.getCountProduct() + 1);
                                             ProductDetail productDetail;
 
@@ -428,4 +439,46 @@ public class Spider {
     synchronized public static void setCountProduct(Integer countProduct) {
         Spider.countProduct = countProduct;
     }
+    
+    /**
+     * 
+     * @param dom
+     *            <script type="text/javascript">
+     * 
+     *            var hashQuery = ""; var urlTarget =
+     *            "https://tiki.vn/dien-thoai-philips-e316-hang-chinh-hang-p20420956.html";
+     *            var queryString =
+     *            decodeURIComponent(window.location.search.substring(1));
+     * 
+     *            if(queryString !== 'undefined'){ if(hashQuery){ urlTarget =
+     *            urlTarget + '&jsredirect=oke&'; }else{ urlTarget = urlTarget +
+     *            '?jsredirect=oke&'; } urlTarget = urlTarget + queryString; }
+     * 
+     *            window.location.href = urlTarget;
+     * 
+     *            </script>
+     * 
+     * 
+     * 
+     * @return
+     * @throws UnsupportedEncodingException
+     */
+    public String changeUrl(Element dom, String url)
+            throws UnsupportedEncodingException, ArrayIndexOutOfBoundsException, NullPointerException {
+        String newUrl = "";
+        String newRedirect = "&jsredirect=oke&", newRedirectC = "?jsredirect=oke&";
+
+        String query = URLDecoder.decode(this.redirectPageJsFunctionImpl.locationSearch(url), "UTF-8");
+        String urlTarget = this.redirectPageJsFunctionImpl.getValueOfVariable(dom, "urlTarget")[0];
+        String hashQuery = this.redirectPageJsFunctionImpl.getValueOfVariable(dom, "hashQuery")[0];
+
+        if (hashQuery != null) {
+            newUrl = urlTarget.substring(1, urlTarget.length() - 1) + newRedirect + query;
+        } else {
+            newUrl = urlTarget.substring(1, urlTarget.length() - 1) + newRedirectC + query;
+        }
+
+        return newUrl;
+    }
+
 }
