@@ -158,6 +158,7 @@ public class Spider {
                     Integer totalPage = (int) Math.ceil((float) productType.getTotal() / totalUrlOnApage);
 
                     for (int index = 1; index <= totalPage; index++) {
+                        if(objectDataChild.getKey() == null) break;
                         url = objectDataChild.getKey() + page + index;
                         HTMLDOM2 = Spider.connect(url);
                         // return 48 url for each page
@@ -177,7 +178,6 @@ public class Spider {
                                                 String newUrlRedirect = spider.changeUrl(HTMLDOM3, urlDetail);
                                                 HTMLDOM3 = Spider.connect(newUrlRedirect);
                                             }
-                                            
                                             
                                             Spider.setCountProduct(Spider.getCountProduct() + 1);
                                             ProductDetail productDetail;

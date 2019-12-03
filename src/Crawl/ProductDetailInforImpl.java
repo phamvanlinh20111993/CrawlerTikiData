@@ -51,6 +51,13 @@ public class ProductDetailInforImpl implements ProductDetailInforPage {
 			String url = image.absUrl("src");
 			response.add(url);
 		}
+		//just only have one image
+		if(response.size() == 0) {
+		    getContainerImageList = element.selectFirst("img#product-magiczoom");
+		    if(getContainerImageList != null) {
+		        response.add(getContainerImageList.absUrl("src"));
+		    }
+		}
 		return response;
 	}
 
