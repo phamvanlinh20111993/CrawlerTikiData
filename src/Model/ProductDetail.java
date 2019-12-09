@@ -56,6 +56,15 @@ public class ProductDetail {
 	 * Kích thước 70 x 39 x 12 cm
 	 */
 	List<ObjectData> anotherDetail;
+	
+	/**
+	 * three field bellow using on get advance
+	 */
+	private String productTypeName;
+    //Total product
+    private Integer total;
+    //nha sach kim dong
+    private String categoryProductName;
 
 	public ProductDetail() {
 
@@ -95,6 +104,46 @@ public class ProductDetail {
 	}
 
 	/**
+     * @param productName
+     * @param brand
+     * @param price
+     * @param unit
+     * @param save
+     * @param marketPrice
+     * @param sKU
+     * @param description
+     * @param imageList
+     * @param star
+     * @param votes
+     * @param detailProduct
+     * @param anotherDetail
+     * @param productTypeName
+     * @param total
+     */
+    public ProductDetail(String productName, String brand, Long price, String unit, String save,
+            Long marketPrice, Long sKU, List<String> description, List<String> imageList, Double star,
+            Integer votes, DetailDescriptionProduct detailProduct, List<ObjectData> anotherDetail,
+            String productTypeName, Integer total, String categoryProductName) {
+        super();
+        this.productName = productName;
+        this.brand = brand;
+        this.price = price;
+        this.unit = unit;
+        this.save = save;
+        this.marketPrice = marketPrice;
+        this.SKU = sKU;
+        this.description = description;
+        this.imageList = imageList;
+        this.star = star;
+        this.votes = votes;
+        this.detailProduct = detailProduct;
+        this.anotherDetail = anotherDetail;
+        this.productTypeName = productTypeName;
+        this.total = total;
+        this.categoryProductName = categoryProductName;
+    }
+
+    /**
 	 * @return the productName
 	 */
 	public String getProductName() {
@@ -288,7 +337,49 @@ public class ProductDetail {
 		this.anotherDetail = anotherDetail;
 	}
 	
-	/* (non-Javadoc)
+	/**
+     * @return the productTypeName
+     */
+    public String getProductTypeName() {
+        return productTypeName;
+    }
+
+    /**
+     * @param productTypeName the productTypeName to set
+     */
+    public void setProductTypeName(String productTypeName) {
+        this.productTypeName = productTypeName;
+    }
+
+    /**
+     * @return the total
+     */
+    public Integer getTotal() {
+        return total;
+    }
+
+    /**
+     * @param total the total to set
+     */
+    public void setTotal(Integer total) {
+        this.total = total;
+    }
+    
+    /**
+     * @return the categoryProductName
+     */
+    public String getCategoryProductName() {
+        return categoryProductName;
+    }
+
+    /**
+     * @param categoryProductName the categoryProductName to set
+     */
+    public void setCategoryProductName(String categoryProductName) {
+        this.categoryProductName = categoryProductName;
+    }
+
+    /* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
@@ -298,4 +389,5 @@ public class ProductDetail {
 				+ ", imageList=" + imageList + ", star=" + star + ", votes=" + votes + ", detailProduct="
 				+ detailProduct + ", anotherDetail=" + anotherDetail + "]";
 	}
+	
 }

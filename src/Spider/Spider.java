@@ -34,6 +34,7 @@ public class Spider {
     protected LogFile logFile;
     protected RedirectPageJsFunctionImpl redirectPageJsFunctionImpl;
 
+
     private static Integer countProduct = 0;
 
     public Spider() {
@@ -158,12 +159,12 @@ public class Spider {
                     Integer totalPage = (int) Math.ceil((float) productType.getTotal() / totalUrlOnApage);
 
                     for (int index = 1; index <= totalPage; index++) {
-                        if(objectDataChild.getKey() == null) break;
                         url = objectDataChild.getKey() + page + index;
                         HTMLDOM2 = Spider.connect(url);
                         // return 48 url for each page
                         List<String> listUrlEachPage = catalogAndProductType
                                 .getListUrlProductInAPage(HTMLDOM2);
+                        if(listUrlEachPage == null) break;
                         // reference: https://viblo.asia/p/thread-pools-trong-java-ZK1ov1DxG5b9
                         Future<List<ProductDetail>> future = executorService
                                 .submit(new Callable<List<ProductDetail>>() {
@@ -211,9 +212,7 @@ public class Spider {
                                                 logFile.writeInLogErrorFile("2, Cause: " + ex.getMessage());
                                                 logFile.writeInLogErrorFile("3, At time: " + new Date());
                                             }
-
                                         }
-
                                         return productList;
                                     }
                                 });
@@ -221,14 +220,11 @@ public class Spider {
                     }
                     productType.setProductList(productList);
                     productTypeList.add(productType);
-
                     // count1++;
                 }
-
                 categoryProduct.setProductTypeList(productTypeList);
                 tikiData.setCategoryProduct(categoryProduct);
                 tikiDataList.add(tikiData);
-
                 // count++;
             }
         } catch (NullPointerException e) {
@@ -251,9 +247,10 @@ public class Spider {
 
         return tikiDataList;
     }
-	
-/*	protected List<TikiData> spiderTikiPage() {
-		List<TikiData> tikiDataList = new ArrayList<TikiData>();
+	/**
+	 * 
+	 */
+	protected void spiderTikiPage1() {
 		// create 16 thread for get each product detail
 		ExecutorService executorService = Executors.newFixedThreadPool(Constant.MULTI_THREAD);
 		Document HTMLDOM, HTMLDOM1, HTMLDOM2;
@@ -264,34 +261,23 @@ public class Spider {
 		try {
 			HTMLDOM = Spider.connect(Constant.BASEURL);
 			List<ObjectData> getListType = catalogAndProductType.getTikiData(HTMLDOM);
-
-			int count = 0;
 			for (ObjectData objectData : getListType) {
-				if (count == 1)
-					break;
-				TikiData tikiData = (TikiData) objectData.getValue();
-				HTMLDOM1 = Spider.connect(objectData.getKey());
-				ioFile.writeToFile("ListUrl", "----" + Spider.getCountProduct() + ", Url: " + objectData.getKey());
-				CategoryProduct categoryProduct = catalogAndProductType.getCategoryProduct(HTMLDOM1);
+				HTMLDOM1 = Spider.connect(objectData.getKey().toString());
+				logFile.writeInListUrlCrawlFile(
+                        "----" + Spider.getCountProduct() + ", Url: " + objectData.getKey());
 				List<ObjectData> listUrlProductType = catalogAndProductType.getProductType(HTMLDOM1);
 
-				int count1 = 0;
-				List<ProductType> productTypeList = new ArrayList<>();
 				for (ObjectData objectDataChild : listUrlProductType) {
-					if (count1 == 1)
-						break;
 					ProductType productType = (ProductType) objectDataChild.getValue();
-					ArrayList<ProductDetail> productList = new ArrayList<>();
 					Integer totalPage = (int) Math.ceil((float) productType.getTotal() / totalUrlOnApage);
-
-					int count2 = 0;
+					
 					for (int index = 1; index <= totalPage; index++) {
-						if (count2 == 10)
-							break;
 						url = objectDataChild.getKey() + page + index;
 						HTMLDOM2 = Spider.connect(url);
 						// return 48 url for each page
 						List<String> listUrlEachPage = catalogAndProductType.getListUrlProductInAPage(HTMLDOM2);
+						// page not existed so we exist
+						if(listUrlEachPage == null) break;
 						// reference: https://viblo.asia/p/thread-pools-trong-java-ZK1ov1DxG5b9
 						executorService.execute(new Runnable() {
 							@Override
@@ -299,82 +285,83 @@ public class Spider {
 								for (String urlDetail : listUrlEachPage) {
 									Document HTMLDOM3 = Spider.connect(urlDetail);
 									Spider spider = new Spider();
+									//change url
+									if(productDetailOnPage.checkIsRedirectPage(HTMLDOM3)) {
+                                        String newUrlRedirect;
+                                        try {
+                                            newUrlRedirect = spider.changeUrl(HTMLDOM3, urlDetail);
+                                            HTMLDOM3 = Spider.connect(newUrlRedirect);
+                                        } catch (ArrayIndexOutOfBoundsException | UnsupportedEncodingException
+                                                | NullPointerException e) {
+                                            logFile.writeInLogErrorFile(
+                                                    "##################### Error NullPointerException #########################");
+                                            logFile.writeInLogErrorFile("1, Url: " + urlDetail);
+                                            logFile.writeInLogErrorFile("2, Cause: " + e.getMessage());
+                                            logFile.writeInLogErrorFile("3, At time: " + new Date());
+                                        }                           
+                                    }
+									
 									Spider.setCountProduct(Spider.getCountProduct() + 1);
 									ProductDetail productDetail;
 
 									try {
-										productDetail = spider.getProductDetail(HTMLDOM3);
-										ioFile.writeToFile("TikiData_" + new SimpleDateFormat("dd-MM-yyyy").format(new Date()),
-												convertObjToJson.convertObjectToPrettyJson(productDetail));
-										productList.add(productDetail);
-										ioFile.writeToFile(
-												"ListUrl_" + new SimpleDateFormat("dd-MM-yyyy").format(new Date()),
-												"--------" + Spider.getCountProduct() + ", Url: " + urlDetail);
-										System.out.println(Spider.getCountProduct() + ", Infor: "
-												+ productDetail.getProductName() + "---" + productDetail.getPrice());
-										// break;
+									    productDetail = spider.getProductDetail(HTMLDOM3);
+									    //using in advance
+                                        TikiData tikiData = (TikiData) objectData.getValue();
+                                        productDetail.setCategoryProductName(tikiData.getName());
+                                        productDetail.setProductTypeName(productType.getProductTypeName());
+                                        productDetail.setTotal(productType.getTotal());
+									    //write in this file
+                                        logFile.writeInStorageProductFile(productDetail);
+                                        logFile.writeInListUrlCrawlFile("--------"
+                                                + Spider.getCountProduct() + ", Url: " + urlDetail);
+                                        System.out.println(Spider.getCountProduct() + ", Infor: "
+                                                + productDetail.getProductName() + "---"
+                                                + productDetail.getPrice());
 									} catch (NullPointerException e) {
-										System.out.println(e.getLocalizedMessage());
-										Spider.setCountProduct(Spider.getCountProduct() - 1);
-										System.out.println("Error url: " + urlDetail);
-										ioFile.writeToFile("LogErrorFile_" + Spider.prefixName,
-												"##################### Error NullPointerException #########################");
-										ioFile.writeToFile("LogErrorFile_" + Spider.prefixName, "1, Url: " + urlDetail);
-										ioFile.writeToFile("LogErrorFile_" + Spider.prefixName,
-												"2, Cause: " + e.getMessage());
-										ioFile.writeToFile("LogErrorFile_" + Spider.prefixName,
-												"3, At time: " + new Date());
+									    System.out.println(e.getLocalizedMessage());
+                                        Spider.setCountProduct(Spider.getCountProduct() - 1);
+                                        System.out.println("Error url: " + urlDetail);
+                                        logFile.writeInLogErrorFile(
+                                                "##################### Error NullPointerException #########################");
+                                        logFile.writeInLogErrorFile("1, Url: " + urlDetail);
+                                        logFile.writeInLogErrorFile("2, Cause: " + e.getMessage());
+                                        logFile.writeInLogErrorFile("3, At time: " + new Date());
 									} catch (Exception ex) {
-										System.out.println(ex.getMessage());
-										Spider.setCountProduct(Spider.getCountProduct() - 1);
-										System.out.println("Error url: " + urlDetail);
-										ioFile.writeToFile("LogErrorFile_" + Spider.prefixName,
-												"##################### Error Exception #########################");
-										ioFile.writeToFile("LogErrorFile_" + Spider.prefixName, "1, Url: " + urlDetail);
-										ioFile.writeToFile("LogErrorFile_" + Spider.prefixName,
-												"2, Cause: " + ex.getMessage());
-										ioFile.writeToFile("LogErrorFile_" + Spider.prefixName,
-												"3, At time: " + new Date());
+									    ex.printStackTrace();
+                                        Spider.setCountProduct(Spider.getCountProduct() - 1);
+                                        System.out.println("Error url: " + urlDetail);
+                                        logFile.writeInLogErrorFile(
+                                                "##################### Error Exception #########################");
+                                        logFile.writeInLogErrorFile("1, Url: " + urlDetail);
+                                        logFile.writeInLogErrorFile("2, Cause: " + ex.getMessage());
+                                        logFile.writeInLogErrorFile("3, At time: " + new Date());
 									}
 
 								}
 							}
 						});
-						count2++;
 					}
-					productType.setProductList(productList);
-					productTypeList.add(productType);
-
-					count1++;
 				}
-
-				categoryProduct.setProductTypeList(productTypeList);
-				tikiData.setCategoryProduct(categoryProduct);
-				tikiDataList.add(tikiData);
-
-				count++;
 			}
 		} catch (NullPointerException e) {
-			System.out.println(e.getMessage());
-			System.out.println("Error url: " + url);
-			ioFile.writeToFile("LogErrorFile_" + Spider.prefixName,
-					"##################### Error NullPointerException #########################");
-			ioFile.writeToFile("LogErrorFile_" + Spider.prefixName, "1, Url: " + url);
-			ioFile.writeToFile("LogErrorFile_" + Spider.prefixName, "2, Cause: " + e.getLocalizedMessage());
-			ioFile.writeToFile("LogErrorFile_" + Spider.prefixName, "3, At time: " + new Date());
+		    System.out.println(e.getMessage());
+            System.out.println("Error url: " + url);
+            logFile.writeInLogErrorFile(
+                    "##################### Error NullPointerException #########################");
+            logFile.writeInLogErrorFile("1, Url: " + url);
+            logFile.writeInLogErrorFile("2, Cause: " + e.getLocalizedMessage());
+            logFile.writeInLogErrorFile("3, At time: " + new Date());
 		} catch (Exception ex) {
-			System.out.println(ex.getMessage());
-			System.out.println("Error url: " + url);
-			ioFile.writeToFile("LogErrorFile_" + Spider.prefixName,
-					"##################### Error Exception #########################");
-			ioFile.writeToFile("LogErrorFile_" + Spider.prefixName, "1, Url: " + url);
-			ioFile.writeToFile("LogErrorFile_" + Spider.prefixName, "2, Cause: " + ex.getLocalizedMessage());
-			ioFile.writeToFile("LogErrorFile_" + Spider.prefixName, "3, At time: " + new Date());
+		    System.out.println(ex.getMessage());
+            System.out.println("Error url: " + url);
+            logFile.writeInLogErrorFile("##################### Error Exception #########################");
+            logFile.writeInLogErrorFile("1, Url: " + url);
+            logFile.writeInLogErrorFile("2, Cause: " + ex.getLocalizedMessage());
+            logFile.writeInLogErrorFile("3, At time: " + new Date());
 		}
 		executorService.shutdown();
-
-		return tikiDataList;
-	} */
+	}
 
     /**
      * 

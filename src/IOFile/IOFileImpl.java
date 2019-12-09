@@ -39,7 +39,7 @@ public class IOFileImpl implements IOFile{
 	 * @param name
 	 * @param data
 	 */
-	public void writeToFile(String path, String name, String data) {
+	public synchronized void writeToFile(String path, String name, String data) {
 
 		String pathName = path + name;
 		this.file = new File(pathName);
@@ -61,7 +61,7 @@ public class IOFileImpl implements IOFile{
 		}
 	}
 	
-	public void clearDataInFile(String path, String name) {
+	public synchronized void clearDataInFile(String path, String name) {
 
 		String pathName = path + name;
 		this.file = new File(pathName);
@@ -84,7 +84,7 @@ public class IOFileImpl implements IOFile{
 	 * @param name
 	 * @return
 	 */
-	public String[] readDataFile(String name, String path) {
+	public synchronized String[] readDataFile(String name, String path) {
 
 		String pathName = path + name;
 		this.file = new File(pathName);
@@ -121,7 +121,7 @@ public class IOFileImpl implements IOFile{
         if (bool) {
             System.out.println("Directory created successfully");
         } else {
-            System.out.println("Sorry couldn’t create specified directory");
+            System.out.println("Couldn’t create specified directory/Directory is created");
         }
 
         pathName += name;

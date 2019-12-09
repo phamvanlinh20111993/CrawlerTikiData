@@ -159,10 +159,12 @@ public class CatalogAndProductTypeImpl implements CatalogAndProductType {
 	public List<String> getListUrlProductInAPage(Element element){
 		List<String> listUrlProductDetail = new ArrayList<>();
 		Element divContainer = element.selectFirst("div.product-box-list");
-		Elements tagAList = divContainer.select("a");
-		for(Element tagA: tagAList) {
-			String url = UtilsFunc.getValueAttrTagHtml(tagA.toString(), "href");
-			listUrlProductDetail.add(url);
+		if(divContainer != null) {
+    		Elements tagAList = divContainer.select("a");
+    		for(Element tagA: tagAList) {
+    			String url = UtilsFunc.getValueAttrTagHtml(tagA.toString(), "href");
+    			listUrlProductDetail.add(url);
+    		}
 		}
 		return listUrlProductDetail;
 	}

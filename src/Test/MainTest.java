@@ -29,9 +29,9 @@ public class MainTest {
 	public static void main(String[] args) {
 		Document doc;
 
-	/*	try {
+		try {
 			// check CatalogAndProductType class
-			CatalogAndProductType testFuncCatalog = new CatalogAndProductTypeImpl();
+			CatalogAndProductType testFuncCatalog = CatalogAndProductTypeImpl.getInstanceObject();
 
 			// test function getTikiData();
 			System.out.println("################################################################################");
@@ -41,12 +41,12 @@ public class MainTest {
 				System.out.println(data.getKey());
 				TikiData tikiData = (TikiData) data.getValue();
 				System.out.println(tikiData.getIcon() + " ---- " + tikiData.getName());
-			}
+			} 
 
 			// check function getListUrlProductInAPage();
 			System.out.println("################################################################################");
 			doc = Jsoup
-					.connect("https://tiki.vn/dien-thoai-may-tinh-bang/c1789?src=c.1789.hamburger_menu_fly_out_banner")
+					.connect("https://tiki.vn/phu-kien-dien-thoai-va-may-tinh-bang/c8214?page=209")
 					.timeout(Constant.MAX_TIME_CONNECTION).get();
 			List<String> listUrl = testFuncCatalog.getListUrlProductInAPage(doc);
 			for (String url : listUrl) {
@@ -90,7 +90,7 @@ public class MainTest {
 		} catch (Exception e) {
 			e.printStackTrace();
 		} 
-		*/
+		
 
 	/*	try {
 			// check ProductDetailInfor class
