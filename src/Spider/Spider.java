@@ -33,8 +33,6 @@ public class Spider {
     private CatalogAndProductType catalogAndProductType;
     protected LogFile logFile;
     protected RedirectPageJsFunctionImpl redirectPageJsFunctionImpl;
-
-
     private static Integer countProduct = 0;
 
     public Spider() {
@@ -192,7 +190,7 @@ public class Spider {
                                                 System.out.println(Spider.getCountProduct() + ", Infor: "
                                                         + productDetail.getProductName() + "---"
                                                         + productDetail.getPrice());
-                                                // break;
+                                               
                                             } catch (NullPointerException e) {
                                                 System.out.println(e.getLocalizedMessage());
                                                 Spider.setCountProduct(Spider.getCountProduct() - 1);
@@ -220,7 +218,7 @@ public class Spider {
                     }
                     productType.setProductList(productList);
                     productTypeList.add(productType);
-                    // count1++;
+                    
                 }
                 categoryProduct.setProductTypeList(productTypeList);
                 tikiData.setCategoryProduct(categoryProduct);
@@ -257,6 +255,7 @@ public class Spider {
 		String page = "&page=";
 		Integer totalUrlOnApage = 48;
 		String url = null;
+		Spider spider = new Spider();
 
 		try {
 			HTMLDOM = Spider.connect(Constant.BASEURL);
@@ -284,7 +283,6 @@ public class Spider {
 							public void run() {
 								for (String urlDetail : listUrlEachPage) {
 									Document HTMLDOM3 = Spider.connect(urlDetail);
-									Spider spider = new Spider();
 									//change url
 									if(productDetailOnPage.checkIsRedirectPage(HTMLDOM3)) {
                                         String newUrlRedirect;
@@ -300,11 +298,11 @@ public class Spider {
                                             logFile.writeInLogErrorFile("3, At time: " + new Date());
                                         }                           
                                     }
-									
-									Spider.setCountProduct(Spider.getCountProduct() + 1);
-									ProductDetail productDetail;
 
 									try {
+									    Spider.setCountProduct(Spider.getCountProduct() + 1);
+	                                    ProductDetail productDetail;
+	                                    
 									    productDetail = spider.getProductDetail(HTMLDOM3);
 									    //using in advance
                                         TikiData tikiData = (TikiData) objectData.getValue();
@@ -319,7 +317,7 @@ public class Spider {
                                                 + productDetail.getProductName() + "---"
                                                 + productDetail.getPrice());
 									} catch (NullPointerException e) {
-									    System.out.println(e.getLocalizedMessage());
+									    e.printStackTrace();
                                         Spider.setCountProduct(Spider.getCountProduct() - 1);
                                         System.out.println("Error url: " + urlDetail);
                                         logFile.writeInLogErrorFile(
@@ -337,7 +335,6 @@ public class Spider {
                                         logFile.writeInLogErrorFile("2, Cause: " + ex.getMessage());
                                         logFile.writeInLogErrorFile("3, At time: " + new Date());
 									}
-
 								}
 							}
 						});
@@ -415,7 +412,7 @@ public class Spider {
     /**
      * @return the countProduct
      */
-    synchronized public static Integer getCountProduct() {
+    public static synchronized Integer getCountProduct() {
         return countProduct;
     }
 
@@ -423,8 +420,10 @@ public class Spider {
      * @param countProduct
      *            the countProduct to set
      */
-    synchronized public static void setCountProduct(Integer countProduct) {
-        Spider.countProduct = countProduct;
+    public static void setCountProduct(Integer countProduct) {
+        synchronized(Spider.class){
+            Spider.countProduct = countProduct;
+        }
     }
     
     /**
