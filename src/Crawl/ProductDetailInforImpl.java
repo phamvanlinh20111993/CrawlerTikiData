@@ -202,7 +202,7 @@ public class ProductDetailInforImpl implements ProductDetailInforPage {
     @Override
     public boolean checkIsRedirectPage(Element dom) {
         Elements divContainer = dom.select("div");
-        return divContainer.size() > 0 ? false : true;
+        return divContainer != null && divContainer.size() > 0 ? false : true;
     }
 	
 }

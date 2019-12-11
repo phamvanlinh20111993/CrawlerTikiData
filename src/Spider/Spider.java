@@ -77,9 +77,11 @@ public class Spider {
                 } catch (IOException e) {
                     System.out.println("Error IOException " + e.getMessage());
                     Min_time_connect += 30000;
+                    HTMLDOM = null;
                     // e.printStackTrace();
                 } catch (Exception e1) {
                     System.out.println("Error Exception " + e1.getMessage());
+                    HTMLDOM = null;
                     Min_time_connect += 30000;
                     // e1.printStackTrace();
                 }
@@ -88,6 +90,7 @@ public class Spider {
 
         return HTMLDOM;
     }
+
     /**
      * 
      * @return
@@ -115,7 +118,7 @@ public class Spider {
                     return countProduct;
                 }
             });
-            
+
             totalProduct += future.get();
             executorService.shutdown();
         } catch (Exception ex) {
@@ -149,7 +152,7 @@ public class Spider {
                         "----" + Spider.getCountProduct() + ", Url: " + objectData.getKey());
                 CategoryProduct categoryProduct = catalogAndProductType.getCategoryProduct(HTMLDOM1);
                 List<ObjectData> listUrlProductType = catalogAndProductType.getProductType(HTMLDOM1);
-               
+
                 List<ProductType> productTypeList = new ArrayList<>();
                 for (ObjectData objectDataChild : listUrlProductType) {
                     ProductType productType = (ProductType) objectDataChild.getValue();
@@ -162,7 +165,8 @@ public class Spider {
                         // return 48 url for each page
                         List<String> listUrlEachPage = catalogAndProductType
                                 .getListUrlProductInAPage(HTMLDOM2);
-                        if(listUrlEachPage == null) break;
+                        if (listUrlEachPage == null)
+                            break;
                         // reference: https://viblo.asia/p/thread-pools-trong-java-ZK1ov1DxG5b9
                         Future<List<ProductDetail>> future = executorService
                                 .submit(new Callable<List<ProductDetail>>() {
@@ -173,11 +177,11 @@ public class Spider {
                                             Document HTMLDOM3 = Spider.connect(urlDetail);
                                             // check if is redirect page we will rec connect new url
                                             Spider spider = new Spider();
-                                            if(productDetailOnPage.checkIsRedirectPage(HTMLDOM3)) {
+                                            if (productDetailOnPage.checkIsRedirectPage(HTMLDOM3)) {
                                                 String newUrlRedirect = spider.changeUrl(HTMLDOM3, urlDetail);
                                                 HTMLDOM3 = Spider.connect(newUrlRedirect);
                                             }
-                                            
+
                                             Spider.setCountProduct(Spider.getCountProduct() + 1);
                                             ProductDetail productDetail;
 
@@ -190,7 +194,7 @@ public class Spider {
                                                 System.out.println(Spider.getCountProduct() + ", Infor: "
                                                         + productDetail.getProductName() + "---"
                                                         + productDetail.getPrice());
-                                               
+
                                             } catch (NullPointerException e) {
                                                 System.out.println(e.getLocalizedMessage());
                                                 Spider.setCountProduct(Spider.getCountProduct() - 1);
@@ -218,7 +222,7 @@ public class Spider {
                     }
                     productType.setProductList(productList);
                     productTypeList.add(productType);
-                    
+
                 }
                 categoryProduct.setProductTypeList(productTypeList);
                 tikiData.setCategoryProduct(categoryProduct);
@@ -245,46 +249,49 @@ public class Spider {
 
         return tikiDataList;
     }
-	/**
-	 * 
-	 */
-	protected void spiderTikiPage1() {
-		// create 16 thread for get each product detail
-		ExecutorService executorService = Executors.newFixedThreadPool(Constant.MULTI_THREAD);
-		Document HTMLDOM, HTMLDOM1, HTMLDOM2;
-		String page = "&page=";
-		Integer totalUrlOnApage = 48;
-		String url = null;
-		Spider spider = new Spider();
 
-		try {
-			HTMLDOM = Spider.connect(Constant.BASEURL);
-			List<ObjectData> getListType = catalogAndProductType.getTikiData(HTMLDOM);
-			for (ObjectData objectData : getListType) {
-				HTMLDOM1 = Spider.connect(objectData.getKey().toString());
-				logFile.writeInListUrlCrawlFile(
+    /**
+     * 
+     */
+    protected void spiderTikiPage1() {
+        // create 16 thread for get each product detail
+        ExecutorService executorService = Executors.newFixedThreadPool(Constant.MULTI_THREAD);
+        Document HTMLDOM, HTMLDOM1, HTMLDOM2;
+        String page = "&page=";
+        Integer totalUrlOnApage = 48;
+        String url = null;
+        Spider spider = new Spider();
+
+        try {
+            HTMLDOM = Spider.connect(Constant.BASEURL);
+            List<ObjectData> getListType = catalogAndProductType.getTikiData(HTMLDOM);
+            for (ObjectData objectData : getListType) {
+                HTMLDOM1 = Spider.connect(objectData.getKey().toString());
+                logFile.writeInListUrlCrawlFile(
                         "----" + Spider.getCountProduct() + ", Url: " + objectData.getKey());
-				List<ObjectData> listUrlProductType = catalogAndProductType.getProductType(HTMLDOM1);
+                List<ObjectData> listUrlProductType = catalogAndProductType.getProductType(HTMLDOM1);
 
-				for (ObjectData objectDataChild : listUrlProductType) {
-					ProductType productType = (ProductType) objectDataChild.getValue();
-					Integer totalPage = (int) Math.ceil((float) productType.getTotal() / totalUrlOnApage);
-					
-					for (int index = 1; index <= totalPage; index++) {
-						url = objectDataChild.getKey() + page + index;
-						HTMLDOM2 = Spider.connect(url);
-						// return 48 url for each page
-						List<String> listUrlEachPage = catalogAndProductType.getListUrlProductInAPage(HTMLDOM2);
-						// page not existed so we exist
-						if(listUrlEachPage == null) break;
-						// reference: https://viblo.asia/p/thread-pools-trong-java-ZK1ov1DxG5b9
-						executorService.execute(new Runnable() {
-							@Override
-							public void run() {
-								for (String urlDetail : listUrlEachPage) {
-									Document HTMLDOM3 = Spider.connect(urlDetail);
-									//change url
-									if(productDetailOnPage.checkIsRedirectPage(HTMLDOM3)) {
+                for (ObjectData objectDataChild : listUrlProductType) {
+                    ProductType productType = (ProductType) objectDataChild.getValue();
+                    Integer totalPage = (int) Math.ceil((float) productType.getTotal() / totalUrlOnApage);
+
+                    for (int index = 1; index <= totalPage; index++) {
+                        url = objectDataChild.getKey() + page + index;
+                        HTMLDOM2 = Spider.connect(url);
+                        // return 48 url for each page
+                        List<String> listUrlEachPage = catalogAndProductType
+                                .getListUrlProductInAPage(HTMLDOM2);
+                        // page not existed so we exist
+                        if (listUrlEachPage == null)
+                            break;
+                        // reference: https://viblo.asia/p/thread-pools-trong-java-ZK1ov1DxG5b9
+                        executorService.execute(new Runnable() {
+                            @Override
+                            public void run() {
+                                for (String urlDetail : listUrlEachPage) {
+                                    Document HTMLDOM3 = Spider.connect(urlDetail);
+                                    // change url
+                                    if (productDetailOnPage.checkIsRedirectPage(HTMLDOM3)) {
                                         String newUrlRedirect;
                                         try {
                                             newUrlRedirect = spider.changeUrl(HTMLDOM3, urlDetail);
@@ -292,32 +299,32 @@ public class Spider {
                                         } catch (ArrayIndexOutOfBoundsException | UnsupportedEncodingException
                                                 | NullPointerException e) {
                                             logFile.writeInLogErrorFile(
-                                                    "##################### Error NullPointerException #########################");
+                                                    "##################### Error NullPointerException, ArrayIndexOutOfBoundsException, UnsupportedEncodingException #########################");
                                             logFile.writeInLogErrorFile("1, Url: " + urlDetail);
                                             logFile.writeInLogErrorFile("2, Cause: " + e.getMessage());
                                             logFile.writeInLogErrorFile("3, At time: " + new Date());
-                                        }                           
+                                        }
                                     }
 
-									try {
-									    Spider.setCountProduct(Spider.getCountProduct() + 1);
-	                                    ProductDetail productDetail;
-	                                    
-									    productDetail = spider.getProductDetail(HTMLDOM3);
-									    //using in advance
+                                    try {
+                                        Spider.setCountProduct(Spider.getCountProduct() + 1);
+                                        ProductDetail productDetail;
+
+                                        productDetail = spider.getProductDetail(HTMLDOM3);
+                                        // using in advance
                                         TikiData tikiData = (TikiData) objectData.getValue();
                                         productDetail.setCategoryProductName(tikiData.getName());
                                         productDetail.setProductTypeName(productType.getProductTypeName());
                                         productDetail.setTotal(productType.getTotal());
-									    //write in this file
+                                        // write in this file
                                         logFile.writeInStorageProductFile(productDetail);
-                                        logFile.writeInListUrlCrawlFile("--------"
-                                                + Spider.getCountProduct() + ", Url: " + urlDetail);
+                                        logFile.writeInListUrlCrawlFile("--------" + Spider.getCountProduct()
+                                                + ", Url: " + urlDetail);
                                         System.out.println(Spider.getCountProduct() + ", Infor: "
                                                 + productDetail.getProductName() + "---"
                                                 + productDetail.getPrice());
-									} catch (NullPointerException e) {
-									    e.printStackTrace();
+                                    } catch (NullPointerException e) {
+                                        e.printStackTrace();
                                         Spider.setCountProduct(Spider.getCountProduct() - 1);
                                         System.out.println("Error url: " + urlDetail);
                                         logFile.writeInLogErrorFile(
@@ -325,8 +332,8 @@ public class Spider {
                                         logFile.writeInLogErrorFile("1, Url: " + urlDetail);
                                         logFile.writeInLogErrorFile("2, Cause: " + e.getMessage());
                                         logFile.writeInLogErrorFile("3, At time: " + new Date());
-									} catch (Exception ex) {
-									    ex.printStackTrace();
+                                    } catch (Exception ex) {
+                                        ex.printStackTrace();
                                         Spider.setCountProduct(Spider.getCountProduct() - 1);
                                         System.out.println("Error url: " + urlDetail);
                                         logFile.writeInLogErrorFile(
@@ -334,31 +341,31 @@ public class Spider {
                                         logFile.writeInLogErrorFile("1, Url: " + urlDetail);
                                         logFile.writeInLogErrorFile("2, Cause: " + ex.getMessage());
                                         logFile.writeInLogErrorFile("3, At time: " + new Date());
-									}
-								}
-							}
-						});
-					}
-				}
-			}
-		} catch (NullPointerException e) {
-		    System.out.println(e.getMessage());
+                                    }
+                                }
+                            }
+                        });
+                    }
+                }
+            }
+        } catch (NullPointerException e) {
+            System.out.println(e.getMessage());
             System.out.println("Error url: " + url);
             logFile.writeInLogErrorFile(
                     "##################### Error NullPointerException #########################");
             logFile.writeInLogErrorFile("1, Url: " + url);
             logFile.writeInLogErrorFile("2, Cause: " + e.getLocalizedMessage());
             logFile.writeInLogErrorFile("3, At time: " + new Date());
-		} catch (Exception ex) {
-		    System.out.println(ex.getMessage());
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
             System.out.println("Error url: " + url);
             logFile.writeInLogErrorFile("##################### Error Exception #########################");
             logFile.writeInLogErrorFile("1, Url: " + url);
             logFile.writeInLogErrorFile("2, Cause: " + ex.getLocalizedMessage());
             logFile.writeInLogErrorFile("3, At time: " + new Date());
-		}
-		executorService.shutdown();
-	}
+        }
+        executorService.shutdown();
+    }
 
     /**
      * 
@@ -421,11 +428,11 @@ public class Spider {
      *            the countProduct to set
      */
     public static void setCountProduct(Integer countProduct) {
-        synchronized(Spider.class){
+        synchronized (Spider.class) {
             Spider.countProduct = countProduct;
         }
     }
-    
+
     /**
      * 
      * @param dom

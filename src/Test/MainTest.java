@@ -34,19 +34,19 @@ public class MainTest {
 			CatalogAndProductType testFuncCatalog = CatalogAndProductTypeImpl.getInstanceObject();
 
 			// test function getTikiData();
-			System.out.println("################################################################################");
+		/*	System.out.println("################################################################################");
 			doc = Jsoup.connect(Constant.BASEURL).timeout(Constant.MAX_TIME_CONNECTION).get();
 			List<ObjectData> dataReturn = testFuncCatalog.getTikiData(doc);
 			for (ObjectData data : dataReturn) {
 				System.out.println(data.getKey());
 				TikiData tikiData = (TikiData) data.getValue();
 				System.out.println(tikiData.getIcon() + " ---- " + tikiData.getName());
-			} 
+			}  */
 
 			// check function getListUrlProductInAPage();
 			System.out.println("################################################################################");
 			doc = Jsoup
-					.connect("https://tiki.vn/phu-kien-dien-thoai-va-may-tinh-bang/c8214?page=209")
+					.connect("https://tiki.vn/may-ep-duoi-toc/c11941")
 					.timeout(Constant.MAX_TIME_CONNECTION).get();
 			List<String> listUrl = testFuncCatalog.getListUrlProductInAPage(doc);
 			for (String url : listUrl) {
@@ -54,7 +54,7 @@ public class MainTest {
 			}
 
 			// test function getBrandEachProductType();
-			System.out.println("################################################################################");
+		/*	System.out.println("################################################################################");
 			doc = Jsoup
 					.connect("https://tiki.vn/voucher-dich-vu/c11312?src=c.11312.hamburger_menu_fly_out_banner&page=5")
 					.timeout(Constant.MAX_TIME_CONNECTION).get();
@@ -84,7 +84,7 @@ public class MainTest {
 			List<Brand> brandList1 = categoryProduct.getBrandList();
 			for (Brand brand : brandList1) {
 				System.out.println(brand.getBrandName() + "----" + brand.getTotal());
-			}
+			} */
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (Exception e) {
