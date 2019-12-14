@@ -260,8 +260,7 @@ public class Spider {
         String page = "&page=";
         Integer totalUrlOnApage = 48;
         String url = null;
-        Spider spider = new Spider();
-
+        
         try {
             HTMLDOM = Spider.connect(Constant.BASEURL);
             List<ObjectData> getListType = catalogAndProductType.getTikiData(HTMLDOM);
@@ -284,67 +283,10 @@ public class Spider {
                         // page not existed so we exist
                         if (listUrlEachPage == null)
                             break;
-                        // reference: https://viblo.asia/p/thread-pools-trong-java-ZK1ov1DxG5b9
-                        executorService.execute(new Runnable() {
-                            @Override
-                            public void run() {
-                                for (String urlDetail : listUrlEachPage) {
-                                    Document HTMLDOM3 = Spider.connect(urlDetail);
-                                    // change url
-                                    if (productDetailOnPage.checkIsRedirectPage(HTMLDOM3)) {
-                                        String newUrlRedirect;
-                                        try {
-                                            newUrlRedirect = spider.changeUrl(HTMLDOM3, urlDetail);
-                                            HTMLDOM3 = Spider.connect(newUrlRedirect);
-                                        } catch (ArrayIndexOutOfBoundsException | UnsupportedEncodingException
-                                                | NullPointerException e) {
-                                            logFile.writeInLogErrorFile(
-                                                    "##################### Error NullPointerException, ArrayIndexOutOfBoundsException, UnsupportedEncodingException #########################");
-                                            logFile.writeInLogErrorFile("1, Url: " + urlDetail);
-                                            logFile.writeInLogErrorFile("2, Cause: " + e.getMessage());
-                                            logFile.writeInLogErrorFile("3, At time: " + new Date());
-                                        }
-                                    }
-
-                                    try {
-                                        Spider.setCountProduct(Spider.getCountProduct() + 1);
-                                        ProductDetail productDetail;
-
-                                        productDetail = spider.getProductDetail(HTMLDOM3);
-                                        // using in advance
-                                        TikiData tikiData = (TikiData) objectData.getValue();
-                                        productDetail.setCategoryProductName(tikiData.getName());
-                                        productDetail.setProductTypeName(productType.getProductTypeName());
-                                        productDetail.setTotal(productType.getTotal());
-                                        // write in this file
-                                        logFile.writeInStorageProductFile(productDetail);
-                                        logFile.writeInListUrlCrawlFile("--------" + Spider.getCountProduct()
-                                                + ", Url: " + urlDetail);
-                                        System.out.println(Spider.getCountProduct() + ", Infor: "
-                                                + productDetail.getProductName() + "---"
-                                                + productDetail.getPrice());
-                                    } catch (NullPointerException e) {
-                                        e.printStackTrace();
-                                        Spider.setCountProduct(Spider.getCountProduct() - 1);
-                                        System.out.println("Error url: " + urlDetail);
-                                        logFile.writeInLogErrorFile(
-                                                "##################### Error NullPointerException #########################");
-                                        logFile.writeInLogErrorFile("1, Url: " + urlDetail);
-                                        logFile.writeInLogErrorFile("2, Cause: " + e.getMessage());
-                                        logFile.writeInLogErrorFile("3, At time: " + new Date());
-                                    } catch (Exception ex) {
-                                        ex.printStackTrace();
-                                        Spider.setCountProduct(Spider.getCountProduct() - 1);
-                                        System.out.println("Error url: " + urlDetail);
-                                        logFile.writeInLogErrorFile(
-                                                "##################### Error Exception #########################");
-                                        logFile.writeInLogErrorFile("1, Url: " + urlDetail);
-                                        logFile.writeInLogErrorFile("2, Cause: " + ex.getMessage());
-                                        logFile.writeInLogErrorFile("3, At time: " + new Date());
-                                    }
-                                }
-                            }
-                        });
+                        TikiData tikiData = (TikiData) objectData.getValue();
+                        this.getProductDetailToFile(executorService, listUrlEachPage, tikiData.getName(),
+                                productType.getProductTypeName(), productType.getTotal(),
+                                logFile.getPathFile());
                     }
                 }
             }
@@ -414,6 +356,148 @@ public class Spider {
         productDetail.setAnotherDetail(anotherData);
 
         return productDetail;
+    }
+    
+    /**
+     * 
+     */
+    protected void spiderTikiPage2(Integer startCrawlInder) {
+        // create 16 thread for get each product detail
+        ExecutorService executorService = Executors.newFixedThreadPool(Constant.MULTI_THREAD);
+        Document HTMLDOM, HTMLDOM1, HTMLDOM2;
+        String page = "&page=";
+        Integer totalUrlOnApage = 48;
+        String url = null;
+        String pathRoot = null;
+       
+        try {
+            HTMLDOM = Spider.connect(Constant.BASEURL);
+            List<ObjectData> getListType = catalogAndProductType.getTikiData(HTMLDOM);
+            int count = 0;
+            for (ObjectData objectData : getListType) {
+                //omit this 
+                TikiData tikiData = (TikiData) objectData.getValue();
+                if (count++ < startCrawlInder) {
+                    System.out.println(count + ", Crawled " + tikiData.getName());
+                    continue;
+                }
+                
+                String path = logFile.returnListProductByTypePath(tikiData.getName());
+                pathRoot = path;
+
+                HTMLDOM1 = Spider.connect(objectData.getKey().toString());
+                logFile.writeInListUrlCrawlFile(path,
+                        "----" + Spider.getCountProduct() + ", Url: " + objectData.getKey());
+                List<ObjectData> listUrlProductType = catalogAndProductType.getProductType(HTMLDOM1);
+
+                for (ObjectData objectDataChild : listUrlProductType) {
+                    ProductType productType = (ProductType) objectDataChild.getValue();
+                    Integer totalPage = (int) Math.ceil((float) productType.getTotal() / totalUrlOnApage);
+
+                    for (int index = 1; index <= totalPage; index++) {
+                        url = objectDataChild.getKey() + page + index;
+                        HTMLDOM2 = Spider.connect(url);
+                        // return 48 url for each page
+                        List<String> listUrlEachPage = catalogAndProductType
+                                .getListUrlProductInAPage(HTMLDOM2);
+                        // page not existed so we exist
+                        if (listUrlEachPage == null)
+                            break;
+                        this.getProductDetailToFile(executorService, listUrlEachPage, tikiData.getName(),
+                                productType.getProductTypeName(), productType.getTotal(), path);
+                    }
+                }
+            }
+        } catch (NullPointerException e) {
+            System.out.println(e.getMessage());
+            System.out.println("Error url: " + url);
+            logFile.writeInLogErrorFile(pathRoot,
+                    "##################### Error NullPointerException #########################");
+            logFile.writeInLogErrorFile(pathRoot, "1, Url: " + url);
+            logFile.writeInLogErrorFile(pathRoot, "2, Cause: " + e.getLocalizedMessage());
+            logFile.writeInLogErrorFile(pathRoot, "3, At time: " + new Date());
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+            System.out.println("Error url: " + url);
+            logFile.writeInLogErrorFile(pathRoot,
+                    "##################### Error Exception #########################");
+            logFile.writeInLogErrorFile(pathRoot, "1, Url: " + url);
+            logFile.writeInLogErrorFile(pathRoot, "2, Cause: " + ex.getLocalizedMessage());
+            logFile.writeInLogErrorFile(pathRoot, "3, At time: " + new Date());
+        }
+        executorService.shutdown();
+
+    }
+    /**
+     * 
+     * @param listUrlEachPage
+     * @param tikiDataName
+     * @param productTypeName
+     * @param total
+     * @param path
+     */
+    private void getProductDetailToFile(ExecutorService executorService, List<String> listUrlEachPage,
+            String tikiDataName, String productTypeName, Integer total, String path) {
+        
+        Spider spider = new Spider();
+
+        executorService.execute(new Runnable() {
+            @Override
+            public void run() {
+                for (String urlDetail : listUrlEachPage) {
+                    Document HTMLDOM3 = Spider.connect(urlDetail);
+                    // change url
+                    if (productDetailOnPage.checkIsRedirectPage(HTMLDOM3)) {
+                        String newUrlRedirect;
+                        try {
+                            newUrlRedirect = spider.changeUrl(HTMLDOM3, urlDetail);
+                            HTMLDOM3 = Spider.connect(newUrlRedirect);
+                        } catch (ArrayIndexOutOfBoundsException | UnsupportedEncodingException
+                                | NullPointerException e) {
+                            logFile.writeInLogErrorFile(path,
+                                    "##################### Error NullPointerException, ArrayIndexOutOfBoundsException, UnsupportedEncodingException #########################");
+                            logFile.writeInLogErrorFile(path, "1, Url: " + urlDetail);
+                            logFile.writeInLogErrorFile(path, "2, Cause: " + e.getMessage());
+                            logFile.writeInLogErrorFile(path, "3, At time: " + new Date());
+                        }
+                    }
+                    
+                    try {
+                        Spider.setCountProduct(Spider.getCountProduct() + 1);
+                        ProductDetail productDetail;
+                        productDetail = spider.getProductDetail(HTMLDOM3);
+                        // using in advance
+                        productDetail.setCategoryProductName(tikiDataName);
+                        productDetail.setProductTypeName(productTypeName);
+                        productDetail.setTotal(total);
+                        // write in this file
+                        logFile.writeInStorageProductFile(path, productDetail);
+                        logFile.writeInListUrlCrawlFile(path,
+                                "--------" + Spider.getCountProduct() + ", Url: " + urlDetail);
+                        System.out.println(Spider.getCountProduct() + ", Infor: "
+                                + productDetail.getProductName() + "---" + productDetail.getPrice());
+                    } catch (NullPointerException e) {
+                        e.printStackTrace();
+                        Spider.setCountProduct(Spider.getCountProduct() - 1);
+                        System.out.println("Error url: " + urlDetail);
+                        logFile.writeInLogErrorFile(path,
+                                "##################### Error NullPointerException #########################");
+                        logFile.writeInLogErrorFile(path, "1, Url: " + urlDetail);
+                        logFile.writeInLogErrorFile(path, "2, Cause: " + e.getMessage());
+                        logFile.writeInLogErrorFile(path, "3, At time: " + new Date());
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                        Spider.setCountProduct(Spider.getCountProduct() - 1);
+                        System.out.println("Error url: " + urlDetail);
+                        logFile.writeInLogErrorFile(path,
+                                "##################### Error Exception #########################");
+                        logFile.writeInLogErrorFile(path, "1, Url: " + urlDetail);
+                        logFile.writeInLogErrorFile(path, "2, Cause: " + ex.getMessage());
+                        logFile.writeInLogErrorFile(path, "3, At time: " + new Date());
+                    }
+                }
+            }
+        });
     }
 
     /**

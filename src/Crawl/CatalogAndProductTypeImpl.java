@@ -162,7 +162,8 @@ public class CatalogAndProductTypeImpl implements CatalogAndProductType {
 		if(divContainer != null) {
     		Elements tagAList = divContainer.select("a");
     		for(Element tagA: tagAList) {
-    			String url = UtilsFunc.getValueAttrTagHtml(tagA.toString(), "href");
+    		//	String url = UtilsFunc.getValueAttrTagHtml(tagA.toString(), "href");
+    			String url = tagA.attr("href").toString();
     			listUrlProductDetail.add(url);
     		}
 		}

@@ -30,6 +30,7 @@ public class LogFile extends IOFileImpl {
 
     private LogFile() {
         this.convertObjectToJson = ConvertObjectToJson.getInstanceObject();
+        this.createPathFile(super.getPathFile() + "\\Data");
         // create file
         this.createFile(this.getPathFile(), this.getLogErrorFile());
         this.createFile(this.getPathFile(), this.getListUrlCrawl());
@@ -54,6 +55,22 @@ public class LogFile extends IOFileImpl {
      * 
      * @param data
      */
+    public void writeInListUrlCrawlFile(String path, String data) {
+        this.writeToFile(path, this.getListUrlCrawl(), data);
+    }
+
+    /**
+     * 
+     * @param data
+     */
+    public void writeInLogErrorFile(String path, String data) {
+        this.writeToFile(path, this.getLogErrorFile(), data);
+    }
+
+    /**
+     * 
+     * @param data
+     */
     public void writeInListUrlCrawlFile(String data) {
         this.writeToFile(getPathFile(), this.getListUrlCrawl(), data);
     }
@@ -66,10 +83,38 @@ public class LogFile extends IOFileImpl {
         String json = convertObjectToJson.convertObjectToPrettyJson(data);
         this.writeToFile(getPathFile(), this.getStorageProductFile(), json);
     }
-    
+
+    /**
+     * 
+     * @param data
+     */
+    public void writeInStorageProductFile(String path, Object data) {
+        String json = convertObjectToJson.convertObjectToPrettyJson(data);
+        this.writeToFile(path, this.getStorageProductFile(), json);
+    }
+
+    /**
+     * 
+     * @param type
+     */
+    public String returnListProductByTypePath(String type) {
+        // create if not exist
+        this.createPathFile(this.getPathFile());
+
+        String pathType = this.getPathFile() + "\\" + type;
+        this.createPathFile(pathType);
+        pathType += "\\";
+        // create file
+        this.createFile(pathType, this.getLogErrorFile());
+        this.createFile(pathType, this.getListUrlCrawl());
+        this.createFile(pathType, this.getStorageProductFile());
+
+        return pathType;
+    }
+
     @Override
     public String getPathFile() {
-        return super.getPathFile() + "\\Data\\Day-" + this.getCurrentDateDDMMYYYY()+"\\";
+        return super.getPathFile() + "\\Data\\Day-" + this.getCurrentDateDDMMYYYY() + "\\";
     }
 
     /**
@@ -100,4 +145,5 @@ public class LogFile extends IOFileImpl {
     private String getProductAndCategoryFile() {
         return "TikiDataJson_" + this.getCurrentDateDDMMYYYY();
     }
+
 }

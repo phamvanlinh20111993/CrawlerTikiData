@@ -29,7 +29,7 @@ public class MainTest {
 	public static void main(String[] args) {
 		Document doc;
 
-		try {
+	/*	try {
 			// check CatalogAndProductType class
 			CatalogAndProductType testFuncCatalog = CatalogAndProductTypeImpl.getInstanceObject();
 
@@ -44,14 +44,14 @@ public class MainTest {
 			}  */
 
 			// check function getListUrlProductInAPage();
-			System.out.println("################################################################################");
+		/*	System.out.println("################################################################################");
 			doc = Jsoup
 					.connect("https://tiki.vn/may-ep-duoi-toc/c11941")
 					.timeout(Constant.MAX_TIME_CONNECTION).get();
 			List<String> listUrl = testFuncCatalog.getListUrlProductInAPage(doc);
 			for (String url : listUrl) {
 				System.out.println(url);
-			}
+			} */
 
 			// test function getBrandEachProductType();
 		/*	System.out.println("################################################################################");
@@ -85,21 +85,21 @@ public class MainTest {
 			for (Brand brand : brandList1) {
 				System.out.println(brand.getBrandName() + "----" + brand.getTotal());
 			} */
-		} catch (IOException e) {
+	/*	} catch (IOException e) {
 			e.printStackTrace();
 		} catch (Exception e) {
 			e.printStackTrace();
-		} 
+		}  */
 		
 
-	/*	try {
+		try {
 			// check ProductDetailInfor class
 			ProductDetailInforPage testProductDetailInfor = ProductDetailInforImpl.getInstanceObject();
-			String url = "https://tiki.vn/dien-thoai-philips-e316-hang-chinh-hang-xanh-p738611.html?src=category-page-1789.1796&amp;2hi=0";
+			/*	String url = "https://tiki.vn/dien-thoai-philips-e316-hang-chinh-hang-xanh-p738611.html?src=category-page-1789.1796&amp;2hi=0";
 			doc = Jsoup.connect(url)
 					.timeout(Constant.MAX_TIME_CONNECTION)
 					.get();
-			
+		
 			RedirectPageJsFunctionImpl redirectPageJsFunctionImpl = RedirectPageJsFunctionImpl.getInstanceObject();
 			Spider spider = new Spider();
 			System.out.println(doc.selectFirst("script"));
@@ -112,16 +112,17 @@ public class MainTest {
                 System.out.println(v);
 			
 			String query = redirectPageJsFunctionImpl.locationSearch(url);
-			System.out.println("query str: " + query);
+			System.out.println("query str: " + query);*/
 			
 			//test after change url every thing is ok
-			url = "https://tiki.vn/dien-thoai-philips-e316-hang-chinh-hang-p20420956.html&jsredirect=oke&src=category-page-1789.1796&amp;2hi=0";
+			Spider spider = new Spider();
+			String url = "https://tiki.vn/dam-bau-form-chu-a-mm0006-p14684371.html?src=category-page-2549.11603&amp;2hi=0";
             doc = Jsoup.connect(url)
                     .timeout(Constant.MAX_TIME_CONNECTION)
                     .get();
 			
-			String newUrl = spider.changeUrl(doc.selectFirst("script"), url);
-			System.out.println("new url " + newUrl);
+		//	String newUrl = spider.changeUrl(doc.selectFirst("script"), url);
+	//		System.out.println("new url " + newUrl);
 			
 			System.out.println("brand: " + testProductDetailInfor.getBrand(doc));
 			System.out.println("name: " + testProductDetailInfor.getProductName(doc));
@@ -168,7 +169,7 @@ public class MainTest {
 			e.printStackTrace();
 		} catch (Exception e) {
 			e.printStackTrace();
-		} */
+		}
 	
 		
 /*	String str = "<div id=\"gioi-thieu\" class=\"content js-content\" itemprop=\"description\"> \r\n" + 

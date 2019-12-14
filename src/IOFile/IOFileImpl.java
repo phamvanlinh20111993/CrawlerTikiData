@@ -115,15 +115,7 @@ public class IOFileImpl implements IOFile{
 	 */
     public void createFile(String path, String name) {
         String pathName = path;
-        this.file = new File(pathName);
-
-        boolean bool = file.mkdir();
-        if (bool) {
-            System.out.println("Directory created successfully");
-        } else {
-            System.out.println("Couldn’t create specified directory/Directory is created");
-        }
-
+        this.createPathFile(pathName);
         pathName += name;
         this.file = new File(pathName);
         // Create the file
@@ -135,7 +127,22 @@ public class IOFileImpl implements IOFile{
             System.out.println(e.getMessage());
         }
     }
+    
+    /**
+     * 
+     * @param path
+     */
+    public void createPathFile(String path) {
+        String pathName = path;
+        this.file = new File(pathName);
 
+        boolean bool = file.mkdir();
+        if (bool) {
+            System.out.println("Directory created successfully");
+        } else {
+            System.out.println("Couldn’t create specified directory/Directory is created");
+        }
+    }
 	/**
 	 * 
 	 * @return

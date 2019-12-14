@@ -13,4 +13,9 @@ public class SpiderCrawl extends Spider {
 	public void getDataAdvance() {
         this.spiderTikiPage1();
     }
+	
+	public void getDataAdvance1() {
+	    // start crawl from index list 
+        this.spiderTikiPage2(15);
+    }
 }

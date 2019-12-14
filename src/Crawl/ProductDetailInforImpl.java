@@ -31,13 +31,15 @@ public class ProductDetailInforImpl implements ProductDetailInforPage {
 	public DetailDescriptionProduct getProductDetail(Element element) {
 		DetailDescriptionProduct desProduct = new DetailDescriptionProduct();
 		Element getProductDetail = element.selectFirst("div#gioi-thieu");
-		desProduct.setDescriptionHtml(getProductDetail.toString());
-		
-		String replaceTask = UtilsFunc.replaceTagHtmlByString(getProductDetail.toString());
-		desProduct.setDescription(replaceTask);
-		
-		List<String> listText = UtilsFunc.getTextInformationInTagHtml(getProductDetail.toString());
-		desProduct.setStorageInformation(listText);
+		if(getProductDetail != null) {
+    		desProduct.setDescriptionHtml(getProductDetail.toString());
+    		
+    		String replaceTask = UtilsFunc.replaceTagHtmlByString(getProductDetail.toString());
+    		desProduct.setDescription(replaceTask);
+    		
+    		List<String> listText = UtilsFunc.getTextInformationInTagHtml(getProductDetail.toString());
+    		desProduct.setStorageInformation(listText);
+		}
 		
 		return desProduct;
 	}
@@ -78,10 +80,17 @@ public class ProductDetailInforImpl implements ProductDetailInforPage {
 	@Override
 	public String getProductName(Element element){
 	    Element divContain = element.selectFirst("div.product-customer-col-5.js-customer-col-5");
-	    divContain = divContain == null ? element : divContain;
-		Element divContainProductName = divContain.selectFirst("div.product-detail");
-		Element divContainProductNameNext = divContainProductName.selectFirst("div.info");
-		Element productNameElement = divContainProductNameNext.selectFirst("div.title");
+	    Element productNameElement = null;
+	    if(divContain != null) {
+    		Element divContainProductName = divContain.selectFirst("div.product-detail");
+    		Element divContainProductNameNext = divContainProductName.selectFirst("div.info");
+    		productNameElement = divContainProductNameNext.selectFirst("div.title");
+	    }else {
+	        divContain = element.selectFirst("h1#product-name");
+	        Elements spanList = divContain.select("span");
+	        productNameElement = spanList.get(spanList.size()-1);
+	    }
+		
 		return productNameElement != null ? UtilsFunc.getValueInTagHtml(productNameElement.toString()) : "";
 	}
 
@@ -192,9 +201,11 @@ public class ProductDetailInforImpl implements ProductDetailInforPage {
 	public List<ObjectData> getAnotherData(Element element){
 		List<ObjectData> anotherDataList = new ArrayList<>();
 		Element divContainer = element.selectFirst("table#chi-tiet");
-		List<String> listText = UtilsFunc.getTextInformationInTagHtml(divContainer.toString());
-		for(int index = 0; index < listText.size()-1; index += 2) {
-			anotherDataList.add(new ObjectData(listText.get(index), listText.get(index+1)));
+		if(divContainer != null) {
+    		List<String> listText = UtilsFunc.getTextInformationInTagHtml(divContainer.toString());
+    		for(int index = 0; index < listText.size()-1; index += 2) {
+    			anotherDataList.add(new ObjectData(listText.get(index), listText.get(index+1)));
+    		}
 		}
 		return anotherDataList;
 	}

@@ -1,5 +1,6 @@
 package Model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class DetailDescriptionProduct {
@@ -11,6 +12,7 @@ public class DetailDescriptionProduct {
 	List<String> storageInformation;
 
 	public DetailDescriptionProduct() {
+	    storageInformation = new ArrayList<String>();
 	}
 
 	/**
